@@ -1,0 +1,19 @@
+LastfmRadio
+
+*Description
+  a LastFM radio client
+
+*How to Use
+
+*Files
+  *README
+    this file
+
+  *README.ja
+    README in japanese
+
+  *src
+    Java codes
+
+  *bin
+    class files

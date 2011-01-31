@@ -1,0 +1,21 @@
+-*- coding:utf-8 -*-
+
+LastfmRadio
+  LastFM 向けラジオクライアント
+
+*使い方
+
+*ファイル構成
+  *README
+    英語版 README
+
+  *README.ja
+    日本語版 README
+
+  *build.xml
+
+  *src
+    Java コード群
+
+  *bin
+    クラスファイル群

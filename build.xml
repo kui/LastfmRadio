@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="LastfmRadio" default="compile">
+
+  <property name="source" value="./src"/>
+  <property name="classes" value="./bin"/>
+
+  <target name="compile">
+    <javac srcdir="${source}"
+	   includeantruntime="false"
+           destdir="${classes}" />
+  </target>
+
+  <target name="clean">
+    <delete dir="${class}" />
+  </target>
+
+</project>
