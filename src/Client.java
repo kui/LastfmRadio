@@ -31,10 +31,10 @@ import java.net.*;
 
 import java.security.MessageDigest;
 
-class Client {
+public class Client {
 
     public static void main(String[] args) throws Exception{
-	Client c = new Client("daftbeats","iamcrz4b");
+	Client c = new Client(new File("account"));
 	c.handshake();
 	c.adjustStation("globaltags", "oldies");
 	System.out.println(c);
@@ -46,6 +46,14 @@ class Client {
 
     String userName, password, session, baseUrl, basePath, station;
     boolean handshakingFlag, adjustingFlag;
+    public Client(File accountFile) 
+	throws FileNotFoundException, IOException{
+	HashMap<String,String> a = loadAccountFile(accountFile);
+	this.userName = a.get("user");
+	this.password = a.get("password");
+	this.session = this.baseUrl = this.basePath = null;
+	this.handshakingFlag = this.adjustingFlag = false;
+    }
     public Client(String userName, String password){
 	this.userName = userName;
 	this.password = password;
@@ -130,11 +138,32 @@ class Client {
 	this.adjustingFlag = true;
     }
 
+    public List<Track> getTracks()
+	throws IOException{
+
+	List<Track> tracks = new ArrayList<Track>(15);
+	return tracks;
+    }
+
     /********************************************************************
                                privete methods
      ********************************************************************/
+    private static HashMap<String,String> loadAccountFile(File f)
+	throws FileNotFoundException, IOException{
 
-    static String createLastfmUri(String paramName, String param)
+	StringBuilder body = new StringBuilder(1024);
+	FileReader fr = new FileReader(f);
+	BufferedReader r = new BufferedReader(fr);
+	String line;
+
+	while((line = r.readLine()) != null){
+	    body.append(line).append("\r\n");
+	}
+
+	return parseParams(body.toString());
+    }
+
+    private static String createLastfmUri(String paramName, String param)
 	throws UnKnownParamNameException{
 
 	String uriFormat = "lastfm://%s/%s";
@@ -166,7 +195,7 @@ class Client {
 	return uri;
     }
     
-    private String convertMd5(String p){
+    private static String convertMd5(String p){
 	MessageDigest md;
 	try{
 	    md = MessageDigest.getInstance("MD5");
@@ -182,7 +211,7 @@ class Client {
 	return md5.toString();
     }
 
-    private String createParams(String ... args){
+    private static String createParams(String ... args){
 
 	if(args.length % 2 != 0){
 	    String msg = 
@@ -234,7 +263,7 @@ class Client {
 	return body.toString();
     }
 
-    private HashMap<String,String> parseParams(String body){
+    private static HashMap<String,String> parseParams(String body){
 
 	HashMap<String,String> params =
 	    new HashMap<String,String>();
