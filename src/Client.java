@@ -40,6 +40,10 @@ class Client {
 	System.out.println(c);
     }
 
+    /********************************************************************
+                               public methods
+     ********************************************************************/
+
     String userName, password, session, baseUrl, basePath, station;
     boolean handshakingFlag, adjustingFlag;
     public Client(String userName, String password){
@@ -126,6 +130,10 @@ class Client {
 	this.adjustingFlag = true;
     }
 
+    /********************************************************************
+                               privete methods
+     ********************************************************************/
+
     static String createLastfmUri(String paramName, String param)
 	throws UnKnownParamNameException{
 
@@ -156,54 +164,6 @@ class Client {
 	}
 
 	return uri;
-    }
-
-    static class HandShakeException extends Exception{
-
-	HandShakeException(String session, String baseUrl,
-			   String basePath, String msg){
-	    super(createMessage(session,baseUrl,basePath,msg));
-	}
-
-	static String createMessage(String session, String baseUrl,
-			     String basePath, String msg){
-	    if(session.equals("FAILED")){
-		return String.format("invalid user or password (msg=\"%s\")",
-				     msg);
-	    }else{
-		return String.format("some handshake error (session=%s,"+
-				     " base_url=%s, base_path=%s)",
-				     session, baseUrl, basePath);
-	    }
-	}
-    }
-
-    static class AdjustingStationException extends Exception{
-	static String[] MESSAGES = new String[]{
-	    "There is not enough content to play the station. "+
-	    "Due to restrictions imposed by the music labels, "+
-	    "a radio station must have more than 15 tracks; "+
-	    "each by different artists.",
-	    "The group does not have enough members to have a radio station.",
-	    "The artist does not have enough fans to have a radio station.",
-	    "The station is not available for streaming.",
-	    "The station is available to subscribers only.",
-	    "The user does not have enough neighbors to have a radio station.",
-	    "An unknown error occurred."
-	};
-	AdjustingStationException(String m){
-	    super(m);
-	}
-	AdjustingStationException(int i){
-	    this(MESSAGES[i-1]);
-	}
-    }
-
-    static class UnKnownParamNameException extends Exception{
-	UnKnownParamNameException(String paramName){
-	    super(String.format("\"%s\" is an unknown parameter name.",
-				paramName));
-	}
     }
     
     private String convertMd5(String p){
@@ -305,4 +265,58 @@ class Client {
 	sb.append("]");
 	return sb.toString();
     }
+
+
+    /********************************************************************
+                               inner classes
+     ********************************************************************/
+
+    static class HandShakeException extends Exception{
+
+	HandShakeException(String session, String baseUrl,
+			   String basePath, String msg){
+	    super(createMessage(session,baseUrl,basePath,msg));
+	}
+
+	static String createMessage(String session, String baseUrl,
+			     String basePath, String msg){
+	    if(session.equals("FAILED")){
+		return String.format("invalid user or password (msg=\"%s\")",
+				     msg);
+	    }else{
+		return String.format("some handshake error (session=%s,"+
+				     " base_url=%s, base_path=%s)",
+				     session, baseUrl, basePath);
+	    }
+	}
+    }
+
+    static class AdjustingStationException extends Exception{
+	static String[] MESSAGES = new String[]{
+	    "There is not enough content to play the station. "+
+	    "Due to restrictions imposed by the music labels, "+
+	    "a radio station must have more than 15 tracks; "+
+	    "each by different artists.",
+	    "The group does not have enough members to have a radio station.",
+	    "The artist does not have enough fans to have a radio station.",
+	    "The station is not available for streaming.",
+	    "The station is available to subscribers only.",
+	    "The user does not have enough neighbors to have a radio station.",
+	    "An unknown error occurred."
+	};
+	AdjustingStationException(String m){
+	    super(m);
+	}
+	AdjustingStationException(int i){
+	    this(MESSAGES[i-1]);
+	}
+    }
+
+    static class UnKnownParamNameException extends Exception{
+	UnKnownParamNameException(String paramName){
+	    super(String.format("\"%s\" is an unknown parameter name.",
+				paramName));
+	}
+    }
+
 }
