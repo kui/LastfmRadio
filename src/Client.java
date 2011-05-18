@@ -28,6 +28,10 @@ package kui.lastfm.radio;
 import java.util.*;
 import java.io.*;
 import java.net.*;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamException;
 
 import java.security.MessageDigest;
 
@@ -35,9 +39,22 @@ public class Client {
 
     public static void main(String[] args) throws Exception{
 	Client c = new Client(new File("account"));
+
+	System.out.println("handshaking...");
 	c.handshake();
+	System.out.println("done");
+
+	System.out.println("adjusting oldies tag radio...");
 	c.adjustStation("globaltags", "oldies");
+	System.out.println("done");
+
 	System.out.println(c);
+
+	System.out.println("getting tracks...");
+	List<Track> tracks = c.getTracks();
+	System.out.println("track nums: "+tracks.size());
+	System.out.println(tracks);
+	System.out.println("done");
     }
 
     /********************************************************************
@@ -138,11 +155,34 @@ public class Client {
 	this.adjustingFlag = true;
     }
 
-    public List<Track> getTracks()
-	throws IOException{
+    public List<Track> getTracks() throws IOException{
+	return getTracks(true);
+    }
 
-	List<Track> tracks = new ArrayList<Track>(15);
-	return tracks;
+    // url example: 
+    // http://[base_url][base_path]/xspf.php?sk=[SESSIONID]&discovery=0&desktop=1.5.1
+    public List<Track> getTracks(boolean discoveryFlag)
+	throws IOException, XMLStreamException {
+
+	String paramString = 
+	    createParams("sk", session,
+			 "discovery", discoveryFlag ? "1" : "0",
+			 "desktop", "1.5.1");
+	String urlString = 
+	    String.format("http://%s%s/xspf.php?%s",
+			  baseUrl, basePath, paramString);
+
+	// System.out.println("get reader");
+	Reader r;
+	try{
+	    r = getHttpStream(urlString);
+	}catch(URISyntaxException e){
+	    r = null;
+	    System.err.println(e.getMessage());System.exit(1);
+	}
+	
+	// System.out.println("parse xspf");
+	return parseXSPF(r);
     }
 
     /********************************************************************
@@ -233,34 +273,39 @@ public class Client {
     private String getHttpBody(String urlString) 
 	throws URISyntaxException, IOException{
 
-	URI uri = new URI(urlString);
-	URLConnection c;
-	try{
-	    c = uri.toURL().openConnection();
-	}catch(MalformedURLException e){
-	    //c = null;
-	    throw(new URISyntaxException(urlString,
-					 e.getMessage()));
-	}
-
-	InputStreamReader isr;
-	try{
-	    isr = 
-		new InputStreamReader(c.getInputStream(),
-				      "UTF-8"); 
-	}catch(UnsupportedEncodingException e){
-	    isr = null;
-	    System.err.println(e.getMessage());System.exit(1);
-	}
-
 	BufferedReader r =
-	    new BufferedReader(isr);
+	    new BufferedReader(getHttpStream(urlString));
 	String line;
 	StringBuilder body = new StringBuilder(1024*1024);
 	while((line = r.readLine()) != null){
 	    body.append(line).append("\n");
 	}
 	return body.toString();
+    }
+
+    private Reader getHttpStream(String urlString) 
+	throws URISyntaxException, IOException {
+
+	URI uri = new URI(urlString);
+	URLConnection c;
+	try{
+	    c = uri.toURL().openConnection();
+	}catch(MalformedURLException e){
+	    //c = null;
+	    throw new URISyntaxException(urlString,
+					 e.getMessage());
+	}
+
+	InputStreamReader isr;
+	try{
+	    isr = new InputStreamReader(c.getInputStream(),
+					"UTF-8"); 
+	}catch(UnsupportedEncodingException e){
+	    isr = null;
+	    System.err.println(e.getMessage());System.exit(1);
+	}
+
+	return isr;
     }
 
     private static HashMap<String,String> parseParams(String body){
@@ -295,6 +340,39 @@ public class Client {
 	return sb.toString();
     }
 
+    private List<Track> parseXSPF(Reader r) throws XMLStreamException{
+	boolean inTrack = false;
+	ArrayList<Track> tracks = new ArrayList<Track>();
+	Track t = null;
+	XMLInputFactory factory = XMLInputFactory.newInstance();
+	XMLStreamReader reader = factory.createXMLStreamReader(r);
+
+	while(reader.hasNext()) {
+	    String tagName;
+	    switch(reader.getEventType()) {
+	    case XMLStreamConstants.START_ELEMENT:
+		tagName = reader.getName().getLocalPart();
+		if(inTrack && Track.FIELD_NAMES.contains(tagName)) {
+		    t.put(tagName, reader.getElementText());
+		}else if(!inTrack && tagName.equals("track")) {
+		    inTrack = true;
+		    t = new Track();
+		}
+		break;
+	    case XMLStreamConstants.END_ELEMENT:
+		tagName = reader.getName().getLocalPart();
+		if(inTrack && tagName.equals("track")) {
+		    inTrack = false;
+		    tracks.add(t);
+		}
+		break;
+	    default:
+	    }
+	    reader.next();
+	}
+	// System.out.println(tracks);
+	return tracks;
+    }
 
     /********************************************************************
                                inner classes

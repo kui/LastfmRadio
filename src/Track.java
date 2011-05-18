@@ -25,19 +25,45 @@
 
 package kui.lastfm.radio;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.HashMap;
 
 public class Track{
 
-    String artist, title, album, location, duration, imgUrl;
+    static public HashSet<String> FIELD_NAMES = new HashSet<String>();
+    static {
+	FIELD_NAMES.add("creator"); FIELD_NAMES.add("title");
+	FIELD_NAMES.add("album"); FIELD_NAMES.add("location");
+	FIELD_NAMES.add("duration"); FIELD_NAMES.add("image");
+    }
+
+    HashMap<String, String> data;
+
+    public Track() {
+	data = new HashMap<String, String>();
+    }
+
     public Track(String artist, String title, String album,
-		 String location, String duration, 
-		 String imgUrl){
+		 String location, String duration, String imgUrl){
+	this();
+	this.data.put("creator", artist); this.data.put("title", title);
+	this.data.put("album", album); this.data.put("location", location);
+	this.data.put("duration", duration); this.data.put("image", imgUrl);
+    }
 
-	this.artist = artist; this.title = title; this.album = album;
-	this.location = location; this.duration = duration;
-	this.imgUrl = imgUrl;
+    public String put(String key, String val){
+	if(!FIELD_NAMES.contains(key)) {
+	    return null;
+	}
+	return data.put(key, val);
+    }
 
+    public String get(String key){
+	return data.get(key);
+    }
+
+    @Override public String toString(){
+	return data.toString();
     }
 
 }

@@ -17,7 +17,15 @@
     </javac>
   </target>
 
-  <target name="run" depends="compile">
+  <target name="compile-with-unchecked" depends="prepare">
+    <javac srcdir="${source}"
+	   includeantruntime="false"
+           destdir="${classes}">
+      <compilerarg value="-Xlint:unchecked" />
+    </javac>
+  </target>
+
+  <target name="run-client" depends="compile">
     <echo message="${classpath}" />
     <java classname="kui.lastfm.radio.Client"
 	  classpath="${classpath}" />
