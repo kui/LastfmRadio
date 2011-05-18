@@ -30,7 +30,7 @@ import java.util.HashMap;
 
 public class Track{
 
-    static public HashSet<String> FIELD_NAMES = new HashSet<String>();
+    static public final HashSet<String> FIELD_NAMES = new HashSet<String>();
     static {
 	FIELD_NAMES.add("creator"); FIELD_NAMES.add("title");
 	FIELD_NAMES.add("album"); FIELD_NAMES.add("location");
