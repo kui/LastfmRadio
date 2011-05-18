@@ -17,3 +17,6 @@ LastfmRadio
 
   *bin
     class files
+
+  *build.xml
+    for ant

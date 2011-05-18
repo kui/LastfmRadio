@@ -25,9 +25,24 @@
 
 package kui.lastfm.radio;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLConnection;
+import java.net.MalformedURLException;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
@@ -104,8 +119,7 @@ public class Client {
 	this.session = params.get("session");
 	this.baseUrl = params.get("base_url");
 	this.basePath = params.get("base_path");
-	if(this.session == null ||
-	   this.baseUrl == null ||
+	if(this.session == null || this.baseUrl == null ||
 	   this.basePath == null){
 	    throw(new HandShakeException(this.session,
 					 this.baseUrl,
@@ -155,7 +169,7 @@ public class Client {
 	this.adjustingFlag = true;
     }
 
-    public List<Track> getTracks() throws IOException{
+    public List<Track> getTracks() throws IOException, XMLStreamException{
 	return getTracks(true);
     }
 
@@ -280,6 +294,8 @@ public class Client {
 	while((line = r.readLine()) != null){
 	    body.append(line).append("\n");
 	}
+	r.close();
+
 	return body.toString();
     }
 
@@ -372,58 +388,6 @@ public class Client {
 	}
 	// System.out.println(tracks);
 	return tracks;
-    }
-
-    /********************************************************************
-                               inner classes
-     ********************************************************************/
-
-    static class HandShakeException extends Exception{
-
-	HandShakeException(String session, String baseUrl,
-			   String basePath, String msg){
-	    super(createMessage(session,baseUrl,basePath,msg));
-	}
-
-	static String createMessage(String session, String baseUrl,
-			     String basePath, String msg){
-	    if(session.equals("FAILED")){
-		return String.format("invalid user or password (msg=\"%s\")",
-				     msg);
-	    }else{
-		return String.format("some handshake error (session=%s,"+
-				     " base_url=%s, base_path=%s)",
-				     session, baseUrl, basePath);
-	    }
-	}
-    }
-
-    static class AdjustingStationException extends Exception{
-	static String[] MESSAGES = new String[]{
-	    "There is not enough content to play the station. "+
-	    "Due to restrictions imposed by the music labels, "+
-	    "a radio station must have more than 15 tracks; "+
-	    "each by different artists.",
-	    "The group does not have enough members to have a radio station.",
-	    "The artist does not have enough fans to have a radio station.",
-	    "The station is not available for streaming.",
-	    "The station is available to subscribers only.",
-	    "The user does not have enough neighbors to have a radio station.",
-	    "An unknown error occurred."
-	};
-	AdjustingStationException(String m){
-	    super(m);
-	}
-	AdjustingStationException(int i){
-	    this(MESSAGES[i-1]);
-	}
-    }
-
-    static class UnKnownParamNameException extends Exception{
-	UnKnownParamNameException(String paramName){
-	    super(String.format("\"%s\" is an unknown parameter name.",
-				paramName));
-	}
     }
 
 }

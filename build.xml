@@ -9,7 +9,6 @@
   <target name="prepare">
     <mkdir dir="${classes}" />
   </target>
-
   <target name="compile" depends="prepare">
     <javac srcdir="${source}"
 	   includeantruntime="false"
@@ -28,6 +27,12 @@
   <target name="run-client" depends="compile">
     <echo message="${classpath}" />
     <java classname="kui.lastfm.radio.Client"
+	  classpath="${classpath}" />
+  </target>
+
+  <target name="run" depends="compile">
+    <echo message="${classpath}" />
+    <java classname="kui.lastfm.radio.Player"
 	  classpath="${classpath}" />
   </target>
 
