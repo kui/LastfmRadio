@@ -4,6 +4,14 @@ LastfmRadio
   a LastFM radio client
 
 *How to Use
+if you want to listen pop musics, type as blow.
+  $ java -jar lastfmradio-X.X.X.jar tag pops
+
+if you want to listen musics similar to "ABBA", type as blow.
+  $ java -jar lastfmradio-X.X.X.jar artist ABBA
+
+you can see the other way of tuning in by typing as blow.
+  $ java -jar lastfmradio-X.X.X.jar -h
 
 *Files
   *README

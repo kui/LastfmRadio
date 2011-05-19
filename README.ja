@@ -4,6 +4,14 @@ LastfmRadio
   LastFM 向けラジオクライアント
 
 *使い方
+もしポップスが聴きたいときは下記のようにタイプしてください。
+  $ java -jar lastfmradio-X.X.X.jar tag pops
+
+もし "ABBA" に似た曲を聴きたいときは下記のようにタイプしてください。
+  $ java -jar lastfmradio-X.X.X.jar artist ABBA
+
+下記のようにタイプすれば、他の機能も見ることが出来ます。
+  $ java -jar lastfmradio-X.X.X.jar -h
 
 *ファイル構成
   *README
