@@ -60,7 +60,7 @@ public class Player {
 	    List<Track> tracks = client.getTracks();
 	    for(Track t : tracks) {
 		printTrack(t);
-		playTrack(t.get("location"));
+		playTrack(t);
 	    }
 	    loopFlag = false;
 	}
@@ -75,12 +75,12 @@ public class Player {
 	// System.out.println(t);
     }
 
-    public void playTrack(String mp3Location) 
+    public void playTrack(Track t) 
 	throws MalformedURLException, URISyntaxException,
 	       IOException, XMLStreamException, JavaLayerException{
 
 	// connect to the player server
-	URI uri = new URI(mp3Location);
+	URI uri = new URI(t.get("location"));
 	URLConnection c = uri.toURL().openConnection();
 	BufferedInputStream bis =
 	    new BufferedInputStream(c.getInputStream());
@@ -88,8 +88,13 @@ public class Player {
 	// output
 	javazoom.jl.player.Player p = 
 	    new javazoom.jl.player.Player(bis);
-	Thread displayTread = invokeDisplayProgressTread(p);
+	Thread displayTread = invokeDisplayProgressTread(p, t);
 	p.play();
+	try{
+	    displayTread.join();
+	}catch(InterruptedException e){
+	    System.err.println(e.getMessage());
+	}
 
 	// close
 	p.close();
@@ -98,29 +103,37 @@ public class Player {
 
     private static final int DISPLAY_INTERVAL = 1000; // [msec]
     private Thread 
-	invokeDisplayProgressTread(javazoom.jl.player.Player p) {
+	invokeDisplayProgressTread(javazoom.jl.player.Player player,
+				   Track track) {
 	
 	Runnable r =
 	    new Runnable() {
 		private javazoom.jl.player.Player p;
-		public Runnable setPlayer(javazoom.jl.player.Player p){
+		private int duration;
+
+		public Runnable init(javazoom.jl.player.Player p,
+				     Track t){
 		    this.p = p;
+		    this.duration = 
+			Integer.parseInt(t.get("duration"));
 		    return this;
 		}
 		public void run(){
 		    try{
 			while(!p.isComplete()){
 			    Thread.sleep(DISPLAY_INTERVAL);
-			    System.out.printf("%d\r", p.getPosition());
+			    double percentage = 
+				(double) p.getPosition()/duration*100;
+			    System.out.printf("%.2f\r", percentage);
 			    System.out.flush();
 			}
 			System.out.println();
 		    }catch(InterruptedException e){
-			System.out.println(e.getMessage());
+			System.err.println(e.getMessage());
 		    }
-		    System.out.println("done display thread");
+		    // System.out.println("done display thread");
 		}
-	    }.setPlayer(p);
+	    }.init(player, track);
 	Thread t = new Thread(r);
 	t.start();
 	return t;
