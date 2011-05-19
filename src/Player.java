@@ -55,7 +55,7 @@ public class Player {
 	"listening LastFM Radio\n\n"+
 	"param_name: \n"+
 	"  tag, artist, group, personal, playlist, or recommended\n\n"+
-	"param:"+
+	"param: \n"+
 	"  tag name (if param_name=tag)\n"+
 	"  user name (if param_name=parsonal,playlist,recommended)\n"+
 	"  artist name (if param_name=artist)\n"+
@@ -111,9 +111,6 @@ public class Player {
 
 	System.out.println("input param_name");
 	String paramName = input.readLine();
-	if(paramName.equals("tag")){
-	    paramName = "globaltags";
-	}
 
 	System.out.println("input param");
 	String param = input.readLine();
@@ -125,6 +122,11 @@ public class Player {
     public void init(String paramName, String param)
 	throws IOException, HandShakeException,
 	       AdjustingStationException, UnKnownParamNameException {
+
+	if(paramName.equals("tag")){
+	    paramName = "globaltags";
+	}
+
 	System.out.println("shaking hand ...");
 	client.handshake();
 
