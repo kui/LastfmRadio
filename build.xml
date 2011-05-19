@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="LastfmRadio" default="compile">
 
+  <property name="version" value="0.0.1" />
   <property name="source" value="./src" />
   <property name="classes" value="./bin" />
+  <property name="classpath" value="./lib/jl1.0.1.jar:./bin" />
+  <property name="jarfile" value="lastfmradio-${version}.jar" />
 
   <target name="prepare">
     <mkdir dir="${classes}" />
@@ -13,7 +16,7 @@
 	   includeantruntime="false"
            destdir="${classes}">
       <classpath>
-	<pathelement path="./lib/jl1.0.1.jar:./bin" />
+	<pathelement path="${classpath}" />
       </classpath>
     </javac>
   </target>
@@ -39,7 +42,17 @@
   </target>
 
   <target name="clean">
-    <delete dir="${classess}" />
+    <delete dir="${classess}" file="${jarfile}"/>
+  </target>
+
+  <target name="package" depends="compile">
+    <echo message="${classpath}" />
+    <jar basedir="${classes}" jarfile="${jarfile}" update="true">
+      <manifest>
+	<attribute name="Main-Class" value="kui.lastfm.radio.Player" />
+	<attribute name="Class-Path" value="lib/jl1.0.1.jar" />
+      </manifest>
+    </jar>
   </target>
 
 </project>

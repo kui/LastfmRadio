@@ -22,9 +22,12 @@ import javax.xml.stream.XMLStreamException;
 
 import javazoom.jl.decoder.JavaLayerException;
 
+import java.util.Properties;
+
 public class Player {
 
     public static void main(String[] args) throws Exception{
+	System.out.println(System.getProperty("java.class.path"));
 	String profileFileName = "account";
 	Player p = new Player(profileFileName);
 	p.init("globaltags", "oldies");
@@ -101,42 +104,77 @@ public class Player {
 	bis.close();
     }
 
-    private static final int DISPLAY_INTERVAL = 1000; // [msec]
     private Thread 
 	invokeDisplayProgressTread(javazoom.jl.player.Player player,
 				   Track track) {
-	
-	Runnable r =
-	    new Runnable() {
-		private javazoom.jl.player.Player p;
-		private int duration;
-
-		public Runnable init(javazoom.jl.player.Player p,
-				     Track t){
-		    this.p = p;
-		    this.duration = 
-			Integer.parseInt(t.get("duration"));
-		    return this;
-		}
-		public void run(){
-		    try{
-			while(!p.isComplete()){
-			    Thread.sleep(DISPLAY_INTERVAL);
-			    double percentage = 
-				(double) p.getPosition()/duration*100;
-			    System.out.printf("%.2f\r", percentage);
-			    System.out.flush();
-			}
-			System.out.println();
-		    }catch(InterruptedException e){
-			System.err.println(e.getMessage());
-		    }
-		    // System.out.println("done display thread");
-		}
-	    }.init(player, track);
-	Thread t = new Thread(r);
+	Thread t =
+	    new Thread(new DisplayProgressTread(player, track));
 	t.start();
 	return t;
+    }
+
+    private static final int DISPLAY_INTERVAL = 200; // [msec]
+    private static class DisplayProgressTread implements Runnable{
+
+	private javazoom.jl.player.Player p;
+	private int duration;
+
+	public DisplayProgressTread(javazoom.jl.player.Player p,
+				    Track t){
+	    this.p = p;
+	    this.duration = 
+		Integer.parseInt(t.get("duration"));
+	}
+
+	public void run(){
+	    try{
+		displayLoop();
+		System.out.println();
+	    }catch(InterruptedException e){
+		System.err.println(e.getMessage());
+	    }
+	}
+
+	public void displayLoop() throws InterruptedException{
+	    int pos;
+	    int formerPos = 0;
+	    while(!p.isComplete()){
+		Thread.sleep(DISPLAY_INTERVAL);
+		pos = p.getPosition();
+		// do not display it if pos comes down.
+		// because sometime pos becomes zero.
+		if(formerPos > pos) continue;
+		printProgressBar(pos, duration);
+		formerPos = pos;
+	    }
+	    // printProgressBar(duration, duration);
+	}
+	
+	private static final int WIDTH_NUM = 50;
+	private static final String DONE_ELEMENT = "#";
+	private static final String SPACE_ELEMENT = "-";
+	private void printProgressBar(int now, int max){
+	    int elNum = now*WIDTH_NUM/max;
+	    int spaceNum = WIDTH_NUM-elNum;
+	    StringBuilder sb = new StringBuilder();
+	    sb.append(convertSecontToString(now)).append("/")
+		.append(convertSecontToString(max)).append(" |");
+	    for(int i=0; i<elNum; i++){
+		sb.append(DONE_ELEMENT);
+	    }
+	    for(int i=0; i<spaceNum; i++){
+		sb.append(SPACE_ELEMENT);
+	    }
+	    sb.append("|\r");
+	    System.out.print(sb);
+	}
+	
+	private String convertSecontToString(int s){
+	    int sec = s/1000;
+	    int min = sec/60;
+	    sec = sec%60;
+	    return String.format("%02d:%02d", min, sec);
+	}
     }
 
     /*
