@@ -88,7 +88,7 @@ public class Player {
 	// output
 	javazoom.jl.player.Player p = 
 	    new javazoom.jl.player.Player(bis);
-	// invokeDisplayProgressTread(p);
+	invokeDisplayProgressTread(p);
 	p.play();
 
 	// close
