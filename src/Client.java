@@ -224,7 +224,8 @@ public class Client {
 	String uri;
 
 	if(paramName.equals("personal") || 
-	   paramName.equals("neighbours")){
+	   paramName.equals("neighbours") ||
+	   paramName.equals("playlist")){
 
 	    String latter = 
 		String.format("%s/%s",param, paramName);

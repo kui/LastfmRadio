@@ -4,12 +4,15 @@
 package kui.lastfm.radio;
 
 import java.util.List;
+import java.util.HashMap;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
@@ -22,30 +25,83 @@ import javax.xml.stream.XMLStreamException;
 
 import javazoom.jl.decoder.JavaLayerException;
 
-import java.util.Properties;
-
 public class Player {
 
+    private static final String USAGE = 
+	"usage: java -jar lastfmradio-X.X.X [param_name param]\n"+
+	"listening LastFM Radio\n\n"+
+	"param_name: \n"+
+	"  tag, artist, group, personal, playlist, or recommended\n\n"+
+	"param:"+
+	"  tag name (if param_name=tag)\n"+
+	"  user name (if param_name=parsonal,playlist,recommended)\n"+
+	"  artist name (if param_name=artist)\n"+
+	"  group name (if param_name=group)\n"
+	;
+
     public static void main(String[] args) throws Exception{
-	System.out.println(System.getProperty("java.class.path"));
-	String profileFileName = "account";
-	Player p = new Player(profileFileName);
-	p.init("globaltags", "oldies");
+
+	//System.getProperties().list(System.out);
+
+	String profileFileName = "account.txt";
+	Player p;
+	try{
+	    p = new Player(profileFileName);
+	}catch(FileNotFoundException e){
+	    p = null;
+	    System.out.println("ERROR: create \""+profileFileName+
+			       "\" file.\n"+
+			       "       refer \"account.templete\" file.");
+	    System.exit(1);
+	}
+
+	if(args.length == 2){
+	    p.init(args[0], args[1]);
+	}else if(args.length == 0){
+	    p.init();
+	}else{
+	    printUsage();
+	}
+
 	p.play();
+    }
+
+    private static void printUsage(){
+	System.out.println(USAGE);
     }
 
     // 
 
     private Client client;
+    private BufferedReader input;
 
     public Player(String fileName) throws IOException, FileNotFoundException{
 	client = new Client(new File(fileName));
+	input = null;
     }
+
+    public void init()
+	throws IOException, HandShakeException,
+	       AdjustingStationException, UnKnownParamNameException {
+	printUsage();
+	input = new BufferedReader(new InputStreamReader(System.in));
+
+	System.out.println("input param_name");
+	String paramName = input.readLine();
+	if(paramName.equals("tag")){
+	    paramName = "globaltags";
+	}
+
+	System.out.println("input param");
+	String param = input.readLine();
+
+	init(paramName, param);
+    }
+
 
     public void init(String paramName, String param)
 	throws IOException, HandShakeException,
 	       AdjustingStationException, UnKnownParamNameException {
-
 	System.out.println("shaking hand ...");
 	client.handshake();
 
