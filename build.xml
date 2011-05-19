@@ -3,16 +3,18 @@
 
   <property name="source" value="./src" />
   <property name="classes" value="./bin" />
-  <property name="classpath" 
-	    value="${classes}" />
 
   <target name="prepare">
     <mkdir dir="${classes}" />
   </target>
+
   <target name="compile" depends="prepare">
     <javac srcdir="${source}"
 	   includeantruntime="false"
            destdir="${classes}">
+      <classpath>
+	<pathelement path="./lib/jl1.0.1.jar:./bin" />
+      </classpath>
     </javac>
   </target>
 
