@@ -146,7 +146,7 @@ public class Player {
 		printTrack(t);
 		playTrack(t);
 	    }
-	    loopFlag = false;
+	    // loopFlag = false; // getting tracks just one time
 	}
 
     }
@@ -156,7 +156,6 @@ public class Player {
 			  t.get("title"),
 			  t.get("album"),
 			  t.get("creator"));
-	// System.out.println(t);
     }
 
     public void playTrack(Track t) 
@@ -258,30 +257,4 @@ public class Player {
 	}
     }
 
-    /*
-    private final int BUFFER_SIZE = 1024*16;
-    public void playTrack2(String mp3Location)
-	throws MalformedURLException, URISyntaxException, IOException, 
-	       XMLStreamException{
-
-	URI uri = new URI(mp3Location);
-	URLConnection c = uri.toURL().openConnection();
-	BufferedInputStream bis =
-	    new BufferedInputStream(c.getInputStream());
-	byte[] buffer = new byte[BUFFER_SIZE];
-	BufferedOutputStream o = 
-	    new BufferedOutputStream(new FileOutputStream("hoge.mp3"));
-	long offset = 0L;
-	int size;
-	while((size = bis.read(buffer)) >= 0){
-	    o.write(buffer);
-	    offset += size;
-	    System.out.print(offset);
-	    System.out.print("\r");
-	    System.out.flush();
-	}
-	bis.close();
-	o.close();
-    }
-    */
 }
