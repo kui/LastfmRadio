@@ -88,7 +88,7 @@ public class Player {
 	// output
 	javazoom.jl.player.Player p = 
 	    new javazoom.jl.player.Player(bis);
-	invokeDisplayProgressTread(p);
+	Thread displayTread = invokeDisplayProgressTread(p);
 	p.play();
 
 	// close
@@ -103,20 +103,24 @@ public class Player {
 	Runnable r =
 	    new Runnable() {
 		private javazoom.jl.player.Player p;
-		public void setPlayer(javazoom.jl.player.Player p){
+		public Runnable setPlayer(javazoom.jl.player.Player p){
 		    this.p = p;
+		    return this;
 		}
 		public void run(){
 		    try{
-			while(p.isComplete()){
+			while(!p.isComplete()){
 			    Thread.sleep(DISPLAY_INTERVAL);
 			    System.out.printf("%d\r", p.getPosition());
+			    System.out.flush();
 			}
+			System.out.println();
 		    }catch(InterruptedException e){
 			System.out.println(e.getMessage());
 		    }
+		    System.out.println("done display thread");
 		}
-	    };
+	    }.setPlayer(p);
 	Thread t = new Thread(r);
 	t.start();
 	return t;
