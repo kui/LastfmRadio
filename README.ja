@@ -3,14 +3,24 @@
 LastfmRadio
   LastFM 向けラジオクライアント
 
+*初めて起動する方へ
+ はじめに account.template を account.txt という名前でコピーしてください。
+ 次に、自分の last.fm アカウント名とそのパスワードを account.txt に
+ 入力してください。下記の <user_name>、<password>を置換してください。
+
+--- account.txt ---
+user=<user_name>
+password=<password>
+-------------------
+
 *使い方
-もしポップスが聴きたいときは下記のようにタイプしてください。
+ もしポップスが聴きたいときは下記のようにタイプしてください。
   $ java -jar lastfmradio-X.X.X.jar tag pops
 
-もし "ABBA" に似た曲を聴きたいときは下記のようにタイプしてください。
+ もし "ABBA" に似た曲を聴きたいときは下記のようにタイプしてください。
   $ java -jar lastfmradio-X.X.X.jar artist ABBA
 
-下記のようにタイプすれば、他の機能も見ることが出来ます。
+ 下記のようにタイプすれば、他の機能も見ることが出来ます。
   $ java -jar lastfmradio-X.X.X.jar -h
 
 *ファイル構成
