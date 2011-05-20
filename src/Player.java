@@ -134,21 +134,47 @@ public class Player {
 	client.adjustStation(paramName, param);
     }
     
+    private static final int RETRY_NUM = 5;
+    private static final int WAITING_TIME = 2000; // [msec]
     public void play()
 	throws IOException, MalformedURLException, URISyntaxException, 
 	       XMLStreamException, JavaLayerException{
-
+	int retryNum = 0;
 	boolean loopFlag = true;
 	while(loopFlag){
 	    System.out.println("getting tracks ...");
-	    List<Track> tracks = client.getTracks();
+	    List<Track> tracks;
+	    try{
+		tracks = client.getTracks();
+	    }catch(IOException e){
+		System.out.println("getTracks()\tERROR: "+e.getMessage());
+		if(RETRY_NUM < retryNum){
+		    System.out.println("getTracks()\tERROR: reach "+
+				       "a limit of retry "+
+				       "to get track infomations");
+		    break;
+		}
+		retryNum++;
+		sleep();
+		continue;
+	    }
 	    for(Track t : tracks) {
 		printTrack(t);
 		playTrack(t);
 	    }
+	    retryNum = 0;
 	    // loopFlag = false; // getting tracks just one time
 	}
 
+    }
+
+    private static void sleep(){
+	try{
+	    Thread.sleep(WAITING_TIME);
+	}catch(InterruptedException e){
+	    System.out.println("wait()\tERROR: "+e.getMessage());
+	    sleep();
+	}
     }
 
     public void printTrack(Track t){
